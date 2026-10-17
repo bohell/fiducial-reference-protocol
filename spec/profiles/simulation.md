@@ -1,12 +1,12 @@
-# ACP Profile: Simulation Case
+# FRP Profile: Simulation Case
 
-**Profile identifier:** `acp-sim/0.2` · Core requirement: ACP v0.2
+**Profile identifier:** `frp-sim/0.2` · Core requirement: FRP v0.2
 
-This profile maps ACP onto a CFD/simulation case whose cause is a set of dictionaries and a
+This profile maps FRP onto a CFD/simulation case whose cause is a set of dictionaries and a
 mesh recipe, and whose effect is a mesh plus a sequence of result fields.
 
 The interesting problem here is that a simulation artifact has **two** effects with
-different lifetimes: the mesh (a snapshot) and the solution (a trajectory). ACP treats the
+different lifetimes: the mesh (a snapshot) and the solution (a trajectory). FRP treats the
 mesh as the L1-bound effect and the solution as an append-only series of *derived* states,
 each carrying the revision identity of the case that produced it.
 

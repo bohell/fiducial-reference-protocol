@@ -1,8 +1,8 @@
-# ACP Profile: 2D Drawings
+# FRP Profile: 2D Drawings
 
-**Profile identifier:** `acp-drawing2d/0.2` · Core requirement: ACP v0.2 (§ references are to the core spec)
+**Profile identifier:** `frp-drawing2d/0.2` · Core requirement: FRP v0.2 (§ references are to the core spec)
 
-This profile maps the four ACP layers onto two-dimensional drawings: flat parts, plates,
+This profile maps the four FRP layers onto two-dimensional drawings: flat parts, plates,
 gaskets, hole patterns, profiles, and drawing sheets. The cause is a text program that
 emits drawing entities; the effect is a canonicalised DXF plus the entity table used for
 picking.
@@ -61,7 +61,7 @@ set and hashed together with it.
 ### 2.1 The hand-drawn case
 
 A drawing that exists only as a hand-produced file has **no cause**. It cannot be rebuilt
-from anything, so under **ACP-3.4-01** an implementation **MUST** refuse it for the Editor
+from anything, so under **FRP-3.4-01** an implementation **MUST** refuse it for the Editor
 class rather than pretending to reconstruct an edit history.
 
 Such a drawing is still admissible as an *anchor target*: revisions can be snapshotted, refs
@@ -105,7 +105,7 @@ and the first such upgrade silently invalidates every historical ref.
 
 **Profile rule D2-3-04** Two runs of the same cause **MUST** produce byte-identical
 canonical output. A difference **MUST** be reported as an error, not absorbed by widening a
-gate threshold (core ACP-3.5-03).
+gate threshold (core FRP-3.5-03).
 
 **Profile rule D2-3-05** The canonical form **MUST** be human-readable text. A binary
 effect format is admissible only together with its canonical text projection, and the hash
@@ -125,7 +125,7 @@ correspondence between the displayed drawing and the exported DXF.
 
 ## 5. Gate
 
-A conforming gate includes at least one kernel-independent check (**ACP-6.4-02**). In 2D
+A conforming gate includes at least one kernel-independent check (**FRP-6.4-02**). In 2D
 almost every quantity has a closed form, so this is cheaper than in 3D — there is no excuse
 for a gate that only re-measures what the drawing engine just produced.
 
@@ -151,7 +151,7 @@ that reliably catches a dropped feature, because removing a hole from a plate ch
 a small and easily-tolerated percentage.
 
 **Profile rule D2-5-04** A gate **MUST** report all checks, not stop at the first failure
-(core **ACP-6.4-03** requires blocking publication; it does not require early exit).
+(core **FRP-6.4-03** requires blocking publication; it does not require early exit).
 
 ## 6. Reconnect
 
@@ -167,7 +167,7 @@ default thresholds. A profile **MAY** tighten them; it **MUST** state the values
 
 **Profile rule D2-6-01** Matching **MUST** be attempted over the whole entity set and
 **MUST** report the number of candidates within threshold. More than one candidate is
-`ambiguous` and degrades to re-selection (core **ACP-6.2-03**).
+`ambiguous` and degrades to re-selection (core **FRP-6.2-03**).
 
 **Profile rule D2-6-02** A match that lands on a *different* L2 feature name **MUST** be
 treated as a failed reconnect even if the geometry is within threshold.
@@ -180,7 +180,7 @@ to contour level, but it **MUST** record the degradation and the resulting coars
 ## 7. Permission surface for the editing agent
 
 **Profile rule D2-7-01** The agent's write surface **MUST** be the cause script. It **MUST
-NOT** write the DXF, the entity table, the manifest, or the ledger (core **ACP-9.3-01**).
+NOT** write the DXF, the entity table, the manifest, or the ledger (core **FRP-9.3-01**).
 
 **Profile rule D2-7-02** The gate **MUST** run outside the agent's editing context, and the
 agent **MUST NOT** be able to alter thresholds.
@@ -196,10 +196,10 @@ because it is convenient to break.
 drawing and **MUST** reload when the revision changes.
 
 **Profile rule D2-8-02** Picking **MUST** resolve to the canonical entity index, not to a
-renderer object id. A ref that means "the third mesh the browser created" is not an ACP ref.
+renderer object id. A ref that means "the third mesh the browser created" is not an FRP ref.
 
 **Profile rule D2-8-03** The viewer **MUST** treat missing optional fields in the ref table
-as non-fatal, consistent with core **ACP-5.1-02**: a ref must resolve, but the presence of
+as non-fatal, consistent with core **FRP-5.1-02**: a ref must resolve, but the presence of
 every optional descriptor is not a precondition for note creation.
 
 ---
@@ -263,4 +263,4 @@ Exporting the drawing to DXF does not transfer admissibility to the drawing itse
 | SolidWorks drawing | ✓ | ✓ | cause is the model, not the drawing | same |
 
 An implementation **MUST** declare the ceiling it actually reaches rather than the one its
-tooling suggests (**ACP-7-02**).
+tooling suggests (**FRP-7-02**).

@@ -1,7 +1,7 @@
-# 锚定协作协议（ACP）· 中文导读
+# 基准指称协议（FRP）· 中文导读
 
 > 人与智能体在工程工件上对话的交换层。
-> 规范正文（英文，RFC 风格）：[`spec/ACP-v0.2.md`](spec/ACP-v0.2.md)
+> 规范正文（英文，RFC 风格）：[`spec/FRP-v0.2.md`](spec/FRP-v0.2.md)
 
 ---
 
@@ -60,14 +60,14 @@ Profile 可以细化这六条的词汇，**但不能削弱它们**。
 | **Editor** | + I5 | 能改源，能跑门禁，门禁不过不许发布 |
 | **Full** | + I6 | 维护共享账本，决策可 replay |
 
-声明格式：`ACP v0.2 / Editor / CAD`。这样对方在交换任何东西之前，就知道你能干什么。
+声明格式：`FRP v0.2 / Editor / CAD`。这样对方在交换任何东西之前，就知道你能干什么。
 
 ---
 
 ## 仓库结构
 
 ```
-spec/ACP-v0.2.md            规范正文（规范性）
+spec/FRP-v0.2.md            规范正文（规范性）
 spec/profiles/cad.md        参数化 CAD profile（有可运行的参考实现）
 spec/profiles/simulation.md 仿真 case profile（patch=L2，case=L1）
 spec/profiles/drawing2d.md  二维图纸 profile（DXF/DWG；设计级，无参考实现）
@@ -110,7 +110,8 @@ examples/                   带真实数字的示例（S 形管道 3 面，全�
 - 这是 **0.2 草案**，wire format 还会变
 - 参考实现（浏览器点面 → agent 改参数 → 机器验证 → 推新版本 → 账本追加）**已全链路跑通**，
   但实现代码**故意不在本仓库**——协议应该允许任何人用任何引擎实现
-- 已知问题都写在 `CHANGELOG.md` 里，包括"ACP"这个缩写的重名冲突（与 Agent Communication Protocol）
+- 已知问题都写在 `CHANGELOG.md` 里
+- 旧名“ACP / Anchored Collaboration Protocol”已废弃（与 Agent Communication Protocol 重名），v0.2 起更名为 FRP / Fiducial Reference Protocol
 - 最想要的贡献不是代码，是**反例**：如果某条不变量在你的领域里不成立，那个具体工件比一个刚好适配的领域有价值得多
 
 ---

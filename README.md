@@ -1,4 +1,4 @@
-# Anchored Collaboration Protocol (ACP)
+# Fiducial Reference Protocol (FRP)
 
 **Version 0.2 (Draft Standard)** · 2026-10-17
 
@@ -16,7 +16,7 @@ loses everything. When a human and an agent discuss "this hole", the human point
 mouse and the agent has nothing to point back at. The result is a conversation about
 geometry conducted entirely in prose, with no identity, no version, and no proof.
 
-ACP supplies the missing pieces: **a version identity, an address inside that version,
+FRP supplies the missing pieces: **a version identity, an address inside that version,
 a persistent name for the thing you actually want to change, a machine-checkable
 acceptance gate, and an append-only memory both sides share.**
 
@@ -33,7 +33,7 @@ and recomputes the translation table after every rebuild.
 
 A user clicks a face. That face is an *effect* — a surface in one particular build.
 What they actually want is a change to a *cause* — a parameter, a sketch dimension, a
-named feature, a configuration line. ACP is the layer that carries the click to the
+named feature, a configuration line. FRP is the layer that carries the click to the
 right cause without pretending the click survives the rebuild.
 
 Three identity layers do the work:
@@ -54,7 +54,7 @@ translation from L2 back to refs, which is recomputed and re-verified on every r
 
 ```
 spec/
-  ACP-v0.2.md              normative specification (this is the standard)
+  FRP-v0.2.md              normative specification (this is the standard)
   profiles/
     cad.md                 parametric CAD profile (reference implementation)
     simulation.md          CFD/simulation case profile
@@ -72,7 +72,7 @@ README.zh-CN.md            中文导读
 
 Draft. The wire formats in `schema/` are stabilising; the conformance classes in §7 are
 new in v0.2 and expected to change. Implementations are invited to state which
-conformance class they meet rather than claiming "ACP compliant".
+conformance class they meet rather than claiming "FRP compliant".
 
 A worked end-to-end implementation (human picks a face in a browser → agent edits the
 parametric source → machine verification → new revision published → ledger entry
@@ -82,18 +82,28 @@ anyone with any engine.
 
 ## Design position
 
-ACP does not replace STEP, does not replace git, and does not require a particular
+FRP does not replace STEP, does not replace git, and does not require a particular
 kernel. It is a *sidecar*: STEP remains the interchange format for the effect, a source
-file or feature tree remains the cause, and ACP adds the identity and memory that both
+file or feature tree remains the cause, and FRP adds the identity and memory that both
 of them lack. See Appendix B for why the obvious alternatives (git alone, UUIDs per face,
 W3C Web Annotation selectors) do not close this gap.
 
-## Name collision
+## Naming history
 
-"ACP" is also used by unrelated projects (notably *Agent Communication Protocol*).
-This document always refers to the **Anchored Collaboration Protocol**. We are aware of
-the collision and consider renaming before a 1.0 release; suggestions via issues are
-welcome.
+This protocol was published briefly as **ACP / Anchored Collaboration Protocol**. That
+abbreviation collides with *Agent Communication Protocol*, so it was renamed before any
+external implementation existed. The name **FRP / Fiducial Reference Protocol** was adopted
+in its place.
+
+*Fiducial* is the operative word. In PCB assembly, photolithography, and metrology, a
+fiducial is a mark deliberately placed so that a machine can re-establish its coordinate
+system against a part that has shifted, stretched, or distorted. That is the job this
+protocol does for annotations: the artifact keeps changing, and the correspondence is
+re-derived from a small set of stable references rather than assumed.
+
+`FRP` is also used for *Functional Reactive Programming* and for fibre-reinforced polymer.
+Both are distant enough not to be confused in context, but implementations **SHOULD** write
+the full name on first use.
 
 ## Contributing
 

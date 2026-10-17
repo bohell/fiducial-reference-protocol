@@ -1,8 +1,8 @@
-# ACP Profile: Parametric CAD
+# FRP Profile: Parametric CAD
 
-**Profile identifier:** `acp-cad/0.2` · Core requirement: ACP v0.2 (§ references are to the core spec)
+**Profile identifier:** `frp-cad/0.2` · Core requirement: FRP v0.2 (§ references are to the core spec)
 
-This profile maps the four ACP layers onto parametric CAD whose cause is a text program
+This profile maps the four FRP layers onto parametric CAD whose cause is a text program
 and whose effect is an exported B-rep (STEP) plus a triangle tessellation for display.
 
 It is backed by a working end-to-end implementation: a human picks a face in a browser,
@@ -36,7 +36,7 @@ Beyond core §3.4:
 **MUST** produce byte-identical STEP output on repeated runs. Floating-point non-determinism
 in the kernel exporter is admissible only under core §3.6: the effect hash is then computed
 over a canonicalised STEP (re-serialised with sorted entity ordering), and the canonicaliser
-is recorded in the manifest per **ACP-3.6-02**. What was a CAD-specific exception in v0.1 is
+is recorded in the manifest per **FRP-3.6-02**. What was a CAD-specific exception in v0.1 is
 now an application of the core rule.
 
 **CAD-2-02** Parameters that a human is expected to discuss **MUST** be declared as named

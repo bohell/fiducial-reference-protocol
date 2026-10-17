@@ -1,23 +1,23 @@
-# Anchored Collaboration Protocol (ACP)
+# Fiducial Reference Protocol (FRP)
 
 **Version:** 0.2 (Draft Standard)
 **Date:** 2026-10-17
-**Editors:** Dana (大拿) and the ACP contributors
+**Editors:** Dana (大拿) and the FRP contributors
 **Status of this memo:** Draft. Distribution unlimited.
 
 ---
 
 ## Abstract
 
-This document specifies the Anchored Collaboration Protocol (ACP), an exchange layer for
-human–agent collaboration on engineering artifacts. ACP defines three identity layers for
+This document specifies the Fiducial Reference Protocol (FRP), an exchange layer for
+human–agent collaboration on engineering artifacts. FRP defines three identity layers for
 a versioned artifact (an immutable revision identity, a persistent feature identity, and a
 revision-scoped geometric reference), a note format that carries a human's intent from a
 selected region of the rendered artifact to the source that generates it, a
 machine-checkable acceptance gate for the resulting change, and an append-only ledger
 that gives both parties a shared memory of what was agreed and what was measured.
 
-ACP is domain-neutral at its core and specialised by profiles. This document specifies
+FRP is domain-neutral at its core and specialised by profiles. This document specifies
 the core; `spec/profiles/` specifies CAD and simulation profiles.
 
 ---
@@ -47,7 +47,7 @@ The gap is not a modelling problem. It is an identity problem.
 
 ### 1.2 Scope
 
-ACP specifies:
+FRP specifies:
 
 - the three-layer identity model for a versioned artifact (§3);
 - six domain-neutral invariants that any conforming exchange must preserve (§4);
@@ -59,15 +59,40 @@ ACP specifies:
 
 ### 1.3 Non-goals
 
-ACP does **not** specify:
+FRP does **not** specify:
 
 - a geometry kernel, a file format for geometry, or a modelling language. STEP, glTF, and
   the source language of the chosen engine remain the interchange formats.
 - a transport. Notes may travel over HTTP, a message queue, a file drop, or an MCP tool;
   §5 defines payloads, not transport bindings.
 - a permission model for agents beyond the minimum safety requirements in §9.3.
-- how an agent decides *what* to change. ACP constrains what an agent may *claim*, and
+- how an agent decides *what* to change. FRP constrains what an agent may *claim*, and
   how that claim is checked. It says nothing about how the claim is generated.
+
+### 1.4 Why the CAD profile is the ceiling
+
+Conformance in one domain does not transfer automatically, but it transfers in one
+direction. Three-dimensional CAD is the hardest case for this protocol, and an
+implementation that survives it will survive the others:
+
+| Property | 3D CAD | Contracts, code, PCBs |
+|---|---|---|
+| Re-anchoring frequency | every rebuild; a parameter change may re-topologise the whole solid | occasional, when someone explicitly restructures |
+| Re-anchoring visibility | implicit — nothing announces that face 7 is now face 9 | explicit — renumbering and refactoring are deliberate acts |
+| Candidate density | many near-identical regions (a hole pattern, a repeated fillet) | sparse; a clause or function is usually unique in its scope |
+| Fingerprint | geometric, continuous, noisy | structural, discrete, exact |
+
+A correction to a common intuition: the anchors in the other domains are **not** stable.
+A PCB re-annotation, a function split in two, or a contract clause merged and renumbered
+destroys anchors exactly as a CAD rebuild does. What differs is that these events are
+rarer, and that they are performed by a human who knows they are happening. An
+implementation that assumes anchors never move will work until the first refactor and then
+fail wholesale. **Reconnect is required in every domain (I4); only its trigger differs.**
+
+Because the CAD case has the highest re-anchoring frequency, the highest candidate
+density, and the least visible events, a mechanism that reports ambiguity honestly under
+those conditions cannot be too strict elsewhere. The converse does not hold: an approach
+that assumes stable anchors is sufficient for a contract corpus and breaks on a CAD model.
 
 ---
 
@@ -79,7 +104,7 @@ The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RE
 MAY, and OPTIONAL in this document are to be interpreted as described in RFC 2119 and
 RFC 8174, when and only when they appear in bold capitals.
 
-Each normative requirement carries an identifier of the form `ACP-<section>-<nn>` so that
+Each normative requirement carries an identifier of the form `FRP-<section>-<nn>` so that
 conformance claims and test reports can cite it directly.
 
 ### 2.2 Terminology
@@ -127,11 +152,11 @@ conformance claims and test reports can cite it directly.
 
 ### 3.1 Cause and effect duality
 
-**ACP-3.1-01** An implementation **MUST** distinguish, for every artifact, a cause
+**FRP-3.1-01** An implementation **MUST** distinguish, for every artifact, a cause
 representation from an effect representation, and **MUST** be able to rebuild the effect
 from the cause without human intervention.
 
-**ACP-3.1-02** A note **MUST** address its selection in the effect representation and its
+**FRP-3.1-02** A note **MUST** address its selection in the effect representation and its
 intended change in the cause representation.
 
 The duality is not an implementation detail. It is the reason the protocol can be honest:
@@ -146,30 +171,30 @@ that survives rebuilds.
 | L2 | feature | yes (redeclared each revision) | artifact |
 | L3 | ref | yes (recomputed each revision) | one revision |
 
-**ACP-3.2-01** A ref **MUST NOT** be treated as valid outside the revision in which it
+**FRP-3.2-01** A ref **MUST NOT** be treated as valid outside the revision in which it
 was minted. Implementations **MUST** reject or explicitly degrade a ref presented against
 a different revision.
 
-**ACP-3.2-02** A feature name **SHOULD** be stable across revisions of the same artifact.
+**FRP-3.2-02** A feature name **SHOULD** be stable across revisions of the same artifact.
 When a feature is renamed or removed, the implementation **SHOULD** record the rename in
 the revision manifest rather than silently dropping the name.
 
-**ACP-3.2-03** An implementation **MUST NOT** silently reuse a ref for a different region
+**FRP-3.2-03** An implementation **MUST NOT** silently reuse a ref for a different region
 across revisions. If a region disappears, its ref disappears.
 
 ### 3.3 Selection at the effect, modification at the cause
 
-**ACP-3.3-01** The result of *anchor* (resolving a ref) **MUST** include at least: the ref,
+**FRP-3.3-01** The result of *anchor* (resolving a ref) **MUST** include at least: the ref,
 the revision it belongs to, and a measurable geometric signature (for CAD: area, centroid,
 normal; for simulation: patch name and face count; profiles define the exact set).
 
-**ACP-3.3-02** The anchor result **MUST** be sufficient for a modifying agent to locate
+**FRP-3.3-02** The anchor result **MUST** be sufficient for a modifying agent to locate
 the corresponding feature **without** consulting the rendered artifact again. This is the
 practical test of whether a profile is well designed.
 
 ### 3.4 Cause admissibility
 
-An artifact's cause representation is admissible under ACP if and only if:
+An artifact's cause representation is admissible under FRP if and only if:
 
 1. **Deterministic rebuild** — same inputs produce the same geometry; no dependence on
    time, randomness, or ambient environment.
@@ -177,7 +202,7 @@ An artifact's cause representation is admissible under ACP if and only if:
 3. **Machine-editable** — a plain-text (or structured, diffable) edit is possible and can
    be applied by a program without a GUI.
 
-**ACP-3.4-01** An implementation **MUST** verify admissibility at registration time and
+**FRP-3.4-01** An implementation **MUST** verify admissibility at registration time and
 **MUST** refuse an artifact whose cause is not deterministically rebuildable.
 
 > Rationale: a non-deterministic cause makes every gate meaningless, because the
@@ -185,18 +210,18 @@ An artifact's cause representation is admissible under ACP if and only if:
 
 ### 3.5 Revision composition
 
-**ACP-3.5-01** A revision identifier **MUST** be a cryptographic hash over a canonical
+**FRP-3.5-01** A revision identifier **MUST** be a cryptographic hash over a canonical
 serialisation of at least:
 
 - the cause bytes (or a hash tree over them),
 - the effect bytes (or a hash tree over them),
 - the reference table mapping refs to L2 features and geometric signatures.
 
-**ACP-3.5-02** The identifier **SHOULD** be rendered as the first 12 lowercase hex
+**FRP-3.5-02** The identifier **SHOULD** be rendered as the first 12 lowercase hex
 characters for human display, and **MUST** be used in full where collision resistance
 matters.
 
-**ACP-3.5-03** Two revisions with the same identifier **MUST** be byte-identical in cause,
+**FRP-3.5-03** Two revisions with the same identifier **MUST** be byte-identical in cause,
 effect, and reference table. If a rebuild produces a different effect from an identical
 cause, the implementation **MUST** treat this as an error, not as a new revision.
 
@@ -208,24 +233,24 @@ creation ordering, and float formatting noise. Hashing such a container byte-for
 yields an identifier that changes when nothing geometric changed — and that an independent
 party cannot reproduce.
 
-**ACP-3.6-01** Where the effect container carries volatile state, the effect hash **MUST** be
+**FRP-3.6-01** Where the effect container carries volatile state, the effect hash **MUST** be
 computed over a canonical form that removes that state, not over the container bytes as
 written.
 
-**ACP-3.6-02** The canonicaliser **MUST** be identified by name and version in the revision
+**FRP-3.6-02** The canonicaliser **MUST** be identified by name and version in the revision
 manifest (`effect.canonicalizer`). Otherwise a revision identifier that changed because the
 canonicaliser was upgraded is indistinguishable from a geometry change.
 
-**ACP-3.6-03** The canonical form **MUST** be reproducible by an independent implementation
+**FRP-3.6-03** The canonical form **MUST** be reproducible by an independent implementation
 from the same cause. Where the canonical form is not human-readable text, a text projection
 **MUST** be published alongside it so two revisions can be diffed by a reviewer.
 
-**ACP-3.6-04** Two runs of the same cause with the same canonicaliser version **MUST** produce
+**FRP-3.6-04** Two runs of the same cause with the same canonicaliser version **MUST** produce
 byte-identical canonical output. A difference **MUST** be treated as an error and **MUST NOT**
 be absorbed by widening a gate threshold.
 
 > Rationale: without this rule, an artifact whose exporter writes a timestamp cannot
-> participate in ACP at all, and one whose exporter emits entities in creation order
+> participate in FRP at all, and one whose exporter emits entities in creation order
 > produces a new “revision” on every save. Both failures present as protocol instability
 > when the defect is in the exporter. The rule also makes review possible: a reviewer can
 > only diff what is stable.
@@ -234,7 +259,7 @@ be absorbed by widening a gate threshold.
 
 ## 4. Invariants
 
-The core of ACP is six invariants. A profile may specialise their vocabulary; a profile
+The core of FRP is six invariants. A profile may specialise their vocabulary; a profile
 **MUST NOT** weaken them.
 
 **I1 — Version anchoring.**
@@ -275,18 +300,18 @@ interoperability. JSON Schemas are normative and are published under `schema/`.
 A note is the minimal unit a human creates by pointing at an artifact and stating an
 intent.
 
-**ACP-5.1-01** A note **MUST** contain: `id`, `artifact`, `rev`, `refs`, `intent`,
+**FRP-5.1-01** A note **MUST** contain: `id`, `artifact`, `rev`, `refs`, `intent`,
 `created`, `status`.
 
-**ACP-5.1-02** `refs` **MUST** be non-empty, and every ref **MUST** resolve in `rev` at
+**FRP-5.1-02** `refs` **MUST** be non-empty, and every ref **MUST** resolve in `rev` at
 the moment the note is accepted. If any ref fails to resolve, the note **MUST** be
 rejected with a machine-readable reason.
 
-**ACP-5.1-03** `intent` **MUST** be the human's own words. Implementations **MUST NOT**
+**FRP-5.1-03** `intent` **MUST** be the human's own words. Implementations **MUST NOT**
 rewrite `intent`; a machine interpretation, if any, belongs in a separate field
 (`op`/`params`), and the original text is preserved verbatim.
 
-**ACP-5.1-04** `status` **MUST** be one of `new`, `acked`, `done`, `failed`. States other
+**FRP-5.1-04** `status` **MUST** be one of `new`, `acked`, `done`, `failed`. States other
 than these (e.g. `in_review`) are profile-level extensions and **MUST** be namespaced.
 
 ```json
@@ -315,18 +340,18 @@ References:
 (revision: f1ad97db35cf, note id: 20261017-115119)
 ```
 
-**ACP-5.1-05** The rendered form **MUST** carry the revision and the note id, so that a
+**FRP-5.1-05** The rendered form **MUST** carry the revision and the note id, so that a
 note pasted into a chat window remains anchored.
 
 ### 5.2 Revision manifest
 
-**ACP-5.2-01** A manifest **MUST** contain: `rev`, `artifact`, `created`, `cause`,
+**FRP-5.2-01** A manifest **MUST** contain: `rev`, `artifact`, `created`, `cause`,
 `effect`, `features`, `refs`, `gate`.
 
-**ACP-5.2-02** `refs` **MUST** map every minted ref to an L2 feature name and the
+**FRP-5.2-02** `refs` **MUST** map every minted ref to an L2 feature name and the
 geometric signature used for reconnection.
 
-**ACP-5.2-03** `gate` **MUST** record the executed check(s), the numeric threshold, the
+**FRP-5.2-03** `gate` **MUST** record the executed check(s), the numeric threshold, the
 measured value, and the pass/fail outcome. A manifest whose gate has no measured value
 **MUST NOT** be published.
 
@@ -353,17 +378,17 @@ measured value, and the pass/fail outcome. A manifest whose gate has no measured
 
 ### 5.3 Ledger event
 
-**ACP-5.3-01** A ledger event **MUST** contain: `seq`, `at`, `type`, `actor`, `rev`,
+**FRP-5.3-01** A ledger event **MUST** contain: `seq`, `at`, `type`, `actor`, `rev`,
 `payload`.
 
-**ACP-5.3-02** `seq` **MUST** be strictly increasing within a ledger. Implementations
+**FRP-5.3-02** `seq` **MUST** be strictly increasing within a ledger. Implementations
 **MUST NOT** rewrite or delete a committed event; a correction is a new event with
 `type: "correction"` referring to the corrected `seq`.
 
-**ACP-5.3-03** `actor` **MUST** identify a human, an agent, or a service, and **MUST** be
+**FRP-5.3-03** `actor` **MUST** identify a human, an agent, or a service, and **MUST** be
 stable across events.
 
-**ACP-5.3-04** Events describing a measurement **MUST** include the measured values
+**FRP-5.3-04** Events describing a measurement **MUST** include the measured values
 before and after, so that a decision can be replayed without re-running the system.
 
 ```json
@@ -381,21 +406,21 @@ before and after, so that a decision can be replayed without re-running the syst
 
 Resolve a ref against a revision.
 
-**ACP-6.1-01** Anchor **MUST** fail closed: unknown ref, ref from another revision, or
+**FRP-6.1-01** Anchor **MUST** fail closed: unknown ref, ref from another revision, or
 artifact mismatch all produce an error, never a best-effort guess.
 
 ### 6.2 Reconnect
 
 Establish the correspondence between a previous revision's selection and a new revision.
 
-**ACP-6.2-01** Reconnect **MUST** use a declared fingerprint (a named tuple of measurable
+**FRP-6.2-01** Reconnect **MUST** use a declared fingerprint (a named tuple of measurable
 properties) and **MUST** apply a declared matching threshold.
 
-**ACP-6.2-02** Reconnect **MUST** emit a record containing the matched candidates, the
+**FRP-6.2-02** Reconnect **MUST** emit a record containing the matched candidates, the
 chosen candidate, the distance metric value, and the method. This record is written to the
 ledger.
 
-**ACP-6.2-03** If no candidate satisfies the threshold, reconnect **MUST** report
+**FRP-6.2-03** If no candidate satisfies the threshold, reconnect **MUST** report
 `degraded: re-select` and **MUST NOT** return a best-effort match. Ambiguity (two
 candidates within the threshold) **MUST** also be reported rather than resolved silently.
 
@@ -406,10 +431,10 @@ candidates within the threshold) **MUST** also be reported rather than resolved 
 
 Modify the cause.
 
-**ACP-6.3-01** Apply **MUST** be expressed as a change to the cause representation, never
+**FRP-6.3-01** Apply **MUST** be expressed as a change to the cause representation, never
 to the effect representation.
 
-**ACP-6.3-02** An agent performing Apply **MUST** operate within a permission surface that
+**FRP-6.3-02** An agent performing Apply **MUST** operate within a permission surface that
 excludes: network access, process spawning outside the declared build command, credential
 access, and any write outside the artifact's cause directory. Profiles specify the exact
 surface.
@@ -418,10 +443,10 @@ surface.
 
 Run the gate.
 
-**ACP-6.4-01** Verify **MUST** be executed by code, against numerically stated thresholds,
+**FRP-6.4-01** Verify **MUST** be executed by code, against numerically stated thresholds,
 and **MUST** record measured values.
 
-**ACP-6.4-02** Verify **MUST** include at least one check whose expected value is derived
+**FRP-6.4-02** Verify **MUST** include at least one check whose expected value is derived
 independently of the modelling kernel used in Apply (e.g. an analytic formula, a
 conservation law, or a pinned reference dataset).
 
@@ -429,17 +454,17 @@ conservation law, or a pinned reference dataset).
 > self-consistency, not correctness. In the CAD profile, volume, bounding box, and boundary
 > areas are compared against closed-form expressions.
 
-**ACP-6.4-03** A gate that fails **MUST** block publication of the revision and **MUST**
+**FRP-6.4-03** A gate that fails **MUST** block publication of the revision and **MUST**
 produce a ledger event with `type: "gate_failed"`.
 
 ### 6.5 Publish
 
 Make the new revision visible.
 
-**ACP-6.5-01** Publish **MUST** be atomic with respect to readers: a reader sees either the
+**FRP-6.5-01** Publish **MUST** be atomic with respect to readers: a reader sees either the
 previous revision or the new one, never a mixture.
 
-**ACP-6.5-02** Publish **MUST** emit the manifest before the revision becomes addressable.
+**FRP-6.5-02** Publish **MUST** emit the manifest before the revision becomes addressable.
 
 ---
 
@@ -454,11 +479,11 @@ The word "compliant" alone is uninformative. Implementations state a class.
 | **Editor** | Anchor + I5 | Can apply cause-layer edits and enforce a gate before publishing. |
 | **Full** | Editor + I6 | Maintains a shared append-only ledger and can replay decisions. |
 
-**ACP-7-01** An implementation claiming a class **MUST** pass the conformance checklist in
+**FRP-7-01** An implementation claiming a class **MUST** pass the conformance checklist in
 Appendix A for that class.
 
-**ACP-7-02** An implementation **MUST** declare its class and its profile(s) in its
-documentation, in the form `ACP v0.2 / Editor / CAD`, so that a counterpart knows what to
+**FRP-7-02** An implementation **MUST** declare its class and its profile(s) in its
+documentation, in the form `FRP v0.2 / Editor / CAD`, so that a counterpart knows what to
 expect before exchanging anything.
 
 ---
@@ -468,11 +493,11 @@ expect before exchanging anything.
 A profile maps the four layers onto a concrete domain and fixes the fingerprint and gate
 vocabularies.
 
-**ACP-8-01** A profile **MUST** define: L1 source, L2 vocabulary, L3 minting rule, cause
+**FRP-8-01** A profile **MUST** define: L1 source, L2 vocabulary, L3 minting rule, cause
 admissibility constraints, fingerprint tuple, and at least one gate check with its
 threshold.
 
-**ACP-8-02** A profile **MUST NOT** weaken any of the six invariants. It MAY add
+**FRP-8-02** A profile **MUST NOT** weaken any of the six invariants. It MAY add
 domain-specific invariants.
 
 `spec/profiles/cad.md` defines the parametric CAD profile with a working implementation.
@@ -492,42 +517,42 @@ are derived geometrically rather than measured.
 A ref supplied by an untrusted party may point at a different region than intended, or at
 a region chosen to cause an expensive rebuild.
 
-**ACP-9.1-01** Anchor **MUST** return the geometric signature alongside the ref, so the
+**FRP-9.1-01** Anchor **MUST** return the geometric signature alongside the ref, so the
 handling party can compare it against the revision manifest before acting.
 
 ### 9.2 Gate circumvention
 
-**ACP-9.2-01** Publication **MUST** require a successful gate for the revision being
+**FRP-9.2-01** Publication **MUST** require a successful gate for the revision being
 published; an implementation **MUST NOT** allow an override that is not itself recorded as
 a ledger event with an explicit actor.
 
 ### 9.3 Agent permission surface
 
-**ACP-9.3-01** The editing agent **MUST NOT** have write access to the revision store, the
+**FRP-9.3-01** The editing agent **MUST NOT** have write access to the revision store, the
 ledger, or the gate definition. It writes only the cause.
 
-**ACP-9.3-02** The gate **MUST** be evaluated in a separate context from the agent's
+**FRP-9.3-02** The gate **MUST** be evaluated in a separate context from the agent's
 edit — either a separate process or a separate trust domain.
 
 ### 9.4 Replay and forgery
 
-**ACP-9.4-01** Ledger entries **SHOULD** be chained (each entry including the hash of its
+**FRP-9.4-01** Ledger entries **SHOULD** be chained (each entry including the hash of its
 predecessor) so that truncation or reordering is detectable.
 
 ### 9.5 Denial of service via expensive rebuilds
 
-**ACP-9.5-01** Implementations **SHOULD** bound the cost of a single apply+verify cycle and
+**FRP-9.5-01** Implementations **SHOULD** bound the cost of a single apply+verify cycle and
 **SHOULD** rate-limit notes from unauthenticated sources.
 
 ---
 
 ## 10. Privacy Considerations
 
-**ACP-10.1-01** `intent` contains human natural language and **MAY** contain sensitive
+**FRP-10.1-01** `intent` contains human natural language and **MAY** contain sensitive
 information. Implementations that transmit notes to a third-party model **MUST** disclose
 this in their documentation.
 
-**ACP-10.2-01** The ledger is append-only by design; implementations **MUST** provide a
+**FRP-10.2-01** The ledger is append-only by design; implementations **MUST** provide a
 documented mechanism for retention limits that does not silently rewrite history (e.g.
 segment-level expiry with a recorded tombstone).
 
@@ -535,11 +560,11 @@ segment-level expiry with a recorded tombstone).
 
 ## 11. Versioning and Extensibility
 
-**ACP-11.1-01** Unknown fields **MUST** be rejected in the core formats
+**FRP-11.1-01** Unknown fields **MUST** be rejected in the core formats
 (`additionalProperties: false`). Extensions use namespaced keys (`x-<vendor>-<field>`) and
 MUST be ignorable.
 
-**ACP-11.2-01** A change that removes a REQUIRED field or changes the meaning of an
+**FRP-11.2-01** A change that removes a REQUIRED field or changes the meaning of an
 existing field requires a major version increment.
 
 ---
@@ -592,7 +617,7 @@ Answer yes/no; any "no" means the class is not claimed.
 **Why not just use git?**
 git already gives L1 and a durable L2 for text. What it does not give is the *translation*
 between a selected region of the rendered effect and a named cause. A commit tells you
-that `hole_a` changed; it cannot tell you which surface the human clicked. ACP is the
+that `hole_a` changed; it cannot tell you which surface the human clicked. FRP is the
 missing middle: it takes the click, resolves it to a feature, and then hands the actual
 editing to ordinary source control practice.
 
@@ -600,7 +625,7 @@ editing to ordinary source control practice.
 Because face identity is not stable under rebuild in any kernel that supports real
 modelling operations. A persistent UUID per face would have to be maintained by the
 kernel across re-topologisation, which is exactly the problem kernel vendors have worked
-on for decades without a universal answer. ACP takes the opposite position: refs are
+on for decades without a universal answer. FRP takes the opposite position: refs are
 *disposable*, and durability is obtained by re-deriving the mapping and recording the
 evidence.
 

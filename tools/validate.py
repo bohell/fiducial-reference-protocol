@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Repository checks for the ACP specification.
+"""Repository checks for the FRP specification.
 
 Runs the same checks locally and in CI. Exits non-zero on any failure.
 
@@ -9,7 +9,7 @@ Runs the same checks locally and in CI. Exits non-zero on any failure.
      is installed, structural fallback otherwise)
   4. every relative Markdown link resolves
   5. no internal identifiers or credentials leaked into tracked text files
-  6. every normative requirement id (ACP-<sec>-<nn>) cited in a profile exists
+  6. every normative requirement id (FRP-<sec>-<nn>) cited in a profile exists
      in the core specification
 
 Usage:  python3 tools/validate.py [--root .] [--no-jsonschema]
@@ -312,18 +312,18 @@ def check_forbidden(files: list[Path], root: Path) -> int:
 
 
 # ----------------------------------------------------------------- 6
-REQ_DEF = re.compile(r"^\*\*(ACP-[0-9A-Za-z.\-]+)\*\*", re.M)
-REQ_CITE = re.compile(r"\b(ACP-[0-9A-Za-z.\-]+)")
+REQ_DEF = re.compile(r"^\*\*(FRP-[0-9A-Za-z.\-]+)\*\*", re.M)
+REQ_CITE = re.compile(r"\b(FRP-[0-9A-Za-z.\-]+)")
 
 
 def check_requirement_ids(root: Path) -> int:
-    core = root / "spec" / "ACP-v0.2.md"
+    core = root / "spec" / "FRP-v0.2.md"
     if not core.is_file():
         fail("core spec missing")
         return 1
     text = core.read_text(encoding="utf-8")
     defined = set(REQ_DEF.findall(text))
-    # ids may also be defined inline as "**ACP-3.1-01** An implementation ..."
+    # ids may also be defined inline as "**FRP-3.1-01** An implementation ..."
     if not defined:
         fail("no requirement ids defined in core spec")
         return 1
@@ -331,7 +331,7 @@ def check_requirement_ids(root: Path) -> int:
     for prof in sorted((root / "spec" / "profiles").glob("*.md")):
         pt = prof.read_text(encoding="utf-8")
         for cid in set(REQ_CITE.findall(pt)):
-            if re.match(r"^ACP-[0-9]+\.[0-9]+-[0-9]+$", cid) and cid not in defined:
+            if re.match(r"^FRP-[0-9]+\.[0-9]+-[0-9]+$", cid) and cid not in defined:
                 fail(f"{prof.name} cites {cid} which the core does not define")
                 bad += 1
     ok(f"requirement ids ({len(defined)} defined)")
@@ -343,7 +343,7 @@ def main() -> int:
     force_structural = "--no-jsonschema" in sys.argv
     os.chdir(root)
     files = tracked_files(root)
-    print(f"== ACP validation ({len(files)} tracked files) ==")
+    print(f"== FRP validation ({len(files)} tracked files) ==")
     bad = 0
     bad += check_json(files)
     bad += check_schemas(root, force_structural)

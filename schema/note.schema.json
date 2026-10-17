@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:acp:schema:note:0.2",
-  "title": "ACP Note",
-  "description": "Minimal exchange unit: a human's intent bound to a revision and the refs it applies to. See ACP v0.2 §5.1.",
+  "$id": "urn:frp:schema:note:0.2",
+  "title": "FRP Note",
+  "description": "Minimal exchange unit: a human's intent bound to a revision and the refs it applies to. See FRP v0.2 §5.1.",
   "type": "object",
   "additionalProperties": false,
   "required": ["id", "artifact", "rev", "refs", "intent", "created", "status"],
@@ -31,14 +31,14 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 4000,
-      "description": "The human's own words, preserved verbatim (ACP-5.1-03)."
+      "description": "The human's own words, preserved verbatim (FRP-5.1-03)."
     },
     "refs": {
       "type": "array",
       "minItems": 1,
       "maxItems": 256,
       "items": { "type": "string", "pattern": "^#" },
-      "description": "L3 refs. Every ref MUST resolve in `rev` at acceptance time (ACP-5.1-02)."
+      "description": "L3 refs. Every ref MUST resolve in `rev` at acceptance time (FRP-5.1-02)."
     },
     "op": {
       "type": "string",
@@ -52,7 +52,7 @@
     "status": {
       "type": "string",
       "enum": ["new", "acked", "done", "failed"],
-      "description": "Core states. Profile extensions MUST be namespaced (ACP-5.1-04)."
+      "description": "Core states. Profile extensions MUST be namespaced (FRP-5.1-04)."
     },
     "actor": {
       "type": "string",

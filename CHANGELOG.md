@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Anchored Collaboration Protocol specification.
+All notable changes to the Fiducial Reference Protocol specification.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). This project uses
 draft versioning: `0.x` releases may change wire formats.
@@ -9,19 +9,20 @@ draft versioning: `0.x` releases may change wire formats.
 
 ## [Unreleased]
 
-Adds the 2D drawing domain and promotes effect canonicalisation from a CAD footnote to a
-core requirement. Wire formats gain optional fields only, so existing documents remain
-valid and the schema `$id` stays `0.2`. Nothing here removes a required field or changes
-the meaning of an existing one (**ACP-11.2-01**).
+Renames the protocol and adds the 2D drawing domain; effect canonicalisation moves from a
+CAD footnote to a core requirement. Wire formats gain optional fields only, so existing
+documents remain valid and the schema `$id` version stays `0.2`. Nothing here removes a
+required field or changes the meaning of an existing one (**FRP-11.2-01**) — except the
+identifier prefix, which is called out under *Changed* rather than left implicit.
 
 ### Added
 
-- **Core §3.6 — Effect canonicalisation** (**ACP-3.6-01** to **-04**). A container that
+- **Core §3.6 — Effect canonicalisation** (**FRP-3.6-01** to **-04**). A container that
   carries editor-assigned identity, timestamps, session GUIDs, view state, or creation
   ordering cannot be hashed as written. The canonicaliser must be named and versioned in the
   manifest, the form must be reproducible by an independent implementation, and a text
   projection must exist so a reviewer can diff two revisions.
-- **`spec/profiles/drawing2d.md`** — the 2D drawing profile (`acp-drawing2d/0.2`): L2 is a
+- **`spec/profiles/drawing2d.md`** — the 2D drawing profile (`frp-drawing2d/0.2`): L2 is a
   layer or block name, L3 is a canonical entity index, and refs must not be derived from
   DXF handles. Includes two 2D-specific gate checks: **contour closure** (an unclosed
   contour renders correctly and cannot be machined) and **exact entity count** (deleting a
@@ -32,6 +33,31 @@ the meaning of an existing one (**ACP-11.2-01**).
   (no vendor headless mode, so the cause is the design table, not the part file).
 
 ### Changed
+
+- **Rename: ACP → FRP.** The protocol was published briefly as *ACP / Anchored
+  Collaboration Protocol*. That abbreviation collides with *Agent Communication Protocol*,
+  so it was renamed while no external implementation existed. The new name is **FRP /
+  Fiducial Reference Protocol**, Chinese 基准指称协议.
+
+  A *fiducial* is a mark placed on a part so a machine can re-establish its coordinate
+  system against a part that has shifted, stretched, or distorted — standard vocabulary in
+  PCB assembly, photolithography, and metrology. That is what this protocol does for
+  annotations, and it is why the name was chosen over the other available `-RP` options:
+  `ARP`, `SRP`, `CRP`, and `CAP` are all taken by things a reader is likely to have heard of.
+
+  Effect on identifiers: requirement ids move from `ACP-<sec>-<nn>` to `FRP-<sec>-<nn>`,
+  schema `$id` from `urn:acp:schema:*` to `urn:frp:schema:*`, and profile identifiers from
+  `acp-*` to `frp-*`. Strictly, **FRP-11.2-01** governs fields, not identifiers, so this is
+  not a version-breaking change; but it does break citation stability, and renaming after
+  external citation existed would have been much worse.
+
+- **Core §1.4 — Why the CAD profile is the ceiling.** States the direction in which
+  conformance transfers, and corrects a widespread intuition: anchors in contracts, code,
+  and PCBs are *not* stable. Re-annotation, function extraction, and clause renumbering
+  destroy anchors exactly as a CAD rebuild does. What differs is frequency, visibility, and
+  candidate density — and those differences mean an implementation that assumes stable
+  anchors works until the first refactor and then fails wholesale. Reconnect is required in
+  every domain (I4); only its trigger differs.
 
 - **CAD-2-01** now cites core §3.6 instead of carrying its own STEP-specific exception. The
   rule did not change; its scope did. What was written as a CAD concession is now the general
@@ -54,7 +80,7 @@ single unstructured document.
 
 ### Added
 
-- **Normative requirement ids** (`ACP-<section>-<nn>`) so conformance reports can cite text
+- **Normative requirement ids** (`FRP-<section>-<nn>`) so conformance reports can cite text
   directly instead of quoting prose.
 - **Conformance classes** (Viewer / Anchor / Editor / Full, §7) with a checklist in
   Appendix A. Previously an implementation could only claim to be "compliant", which said
@@ -72,7 +98,7 @@ single unstructured document.
 - **Appendix B — Design rationale** (non-normative), including why per-face UUIDs are
   rejected and why refs must be revision-scoped. Both were argued internally; writing them
   down makes them falsifiable.
-- Two profiles with worked numbers: `acp-cad/0.2` and `acp-sim/0.2`.
+- Two profiles with worked numbers: `frp-cad/0.2` and `frp-sim/0.2`.
 - Profile appendices listing **implementation hazards**: build caches keyed by source path,
   daemon workers not inheriting per-call environment, buffered output hiding success flags,
   overlay elements swallowing pointer events, reload-versus-redeployment, and mixed
@@ -100,7 +126,7 @@ single unstructured document.
 
 ### Known issues
 
-- **Name collision.** "ACP" is also used by the Agent Communication Protocol. A rename is
+- **Name collision.** "FRP" is also used by the Agent Communication Protocol. A rename is
   likely before 1.0.
 - **Time-scoped refs** are not specified. Annotating a feature that exists during only part
   of a transient is handled by a payload field, not by a first-class L3 (see

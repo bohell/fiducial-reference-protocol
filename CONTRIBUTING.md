@@ -1,4 +1,4 @@
-# Contributing to ACP
+# Contributing to FRP
 
 The most valuable contribution right now is **not code**. It is disagreement, expressed
 precisely.
@@ -43,7 +43,7 @@ useful piece of code in this project.
 ## What we will probably decline
 
 - **A reference implementation in this repository.** The protocol should be implementable by
-  anyone with any engine. Shipping our implementation here would quietly turn "ACP" into
+  anyone with any engine. Shipping our implementation here would quietly turn "FRP" into
   "our tool with a spec attached". Implementations live in their own repositories and link
   back.
 - **A registry of artifacts or revisions.** A central authority contradicts the point.
@@ -54,7 +54,7 @@ useful piece of code in this project.
 
 1. Open an issue describing the problem before writing a large patch. Protocol changes that
    arrive as finished documents tend to be re-litigated from scratch.
-2. For normative changes, state which requirement id (`ACP-<section>-<nn>`) you are
+2. For normative changes, state which requirement id (`FRP-<section>-<nn>`) you are
    changing and why the current text fails.
 3. Prose style: RFC 2119 keywords in bold capitals only where they carry normative weight.
    No marketing adjectives. A claim about behaviour should be checkable by reading the

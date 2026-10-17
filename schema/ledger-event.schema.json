@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:acp:schema:ledger-event:0.2",
-  "title": "ACP Ledger Event",
-  "description": "One append-only record. Corrections are new events, never rewrites. See ACP v0.2 §5.3.",
+  "$id": "urn:frp:schema:ledger-event:0.2",
+  "title": "FRP Ledger Event",
+  "description": "One append-only record. Corrections are new events, never rewrites. See FRP v0.2 §5.3.",
   "type": "object",
   "additionalProperties": false,
   "required": ["seq", "at", "type", "actor", "rev", "payload"],
@@ -10,7 +10,7 @@
     "seq": {
       "type": "integer",
       "minimum": 1,
-      "description": "Strictly increasing within a ledger (ACP-5.3-02)."
+      "description": "Strictly increasing within a ledger (FRP-5.3-02)."
     },
     "at": { "type": "string", "format": "date-time" },
     "type": {
@@ -44,7 +44,7 @@
     "prev_hash": {
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$",
-      "description": "Hash of the previous event, enabling truncation detection (ACP-9.4-01)."
+      "description": "Hash of the previous event, enabling truncation detection (FRP-9.4-01)."
     }
   }
 }

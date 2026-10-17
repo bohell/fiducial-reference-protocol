@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:acp:schema:revision-manifest:0.2",
-  "title": "ACP Revision Manifest",
-  "description": "Identity and gate record for one immutable revision. See ACP v0.2 §5.2.",
+  "$id": "urn:frp:schema:revision-manifest:0.2",
+  "title": "FRP Revision Manifest",
+  "description": "Identity and gate record for one immutable revision. See FRP v0.2 §5.2.",
   "type": "object",
   "additionalProperties": false,
   "required": ["rev", "artifact", "created", "cause", "effect", "features", "refs", "gate"],
@@ -48,7 +48,7 @@
         },
         "canonicalizer": {
           "type": "object",
-          "description": "Required when the hash is computed over a canonical form rather than the container bytes as written (ACP-3.6-02).",
+          "description": "Required when the hash is computed over a canonical form rather than the container bytes as written (FRP-3.6-02).",
           "additionalProperties": false,
           "required": ["name", "version"],
           "properties": {
@@ -65,7 +65,7 @@
     },
     "renames": {
       "type": "object",
-      "description": "Map of {old_feature_name: new_feature_name} (ACP-3.2-02).",
+      "description": "Map of {old_feature_name: new_feature_name} (FRP-3.2-02).",
       "additionalProperties": { "type": "string" }
     },
     "refs": {
@@ -110,7 +110,7 @@
           "ok": { "type": "boolean" },
           "kernel_independent": {
             "type": "boolean",
-            "description": "True when the expected value was derived outside the modelling kernel (ACP-6.4-02)."
+            "description": "True when the expected value was derived outside the modelling kernel (FRP-6.4-02)."
           }
         }
       }
