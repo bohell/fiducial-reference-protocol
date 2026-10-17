@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:acp:schema:revision-manifest:0.2",
+  "title": "ACP Revision Manifest",
+  "description": "Identity and gate record for one immutable revision. See ACP v0.2 §5.2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["rev", "artifact", "created", "cause", "effect", "features", "refs", "gate"],
+  "properties": {
+    "rev": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8,64}$"
+    },
+    "artifact": { "type": "string", "minLength": 1 },
+    "created": { "type": "string", "format": "date-time" },
+    "parent": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{8,64}$",
+      "description": "Previous revision, or null for the first."
+    },
+    "cause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "hash"],
+      "properties": {
+        "path": { "type": "string" },
+        "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "params": {
+          "type": "object",
+          "description": "Effective parameter set used for this build."
+        },
+        "language": { "type": "string" }
+      }
+    },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "hash"],
+      "properties": {
+        "path": { "type": "string" },
+        "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "format": { "type": "string", "examples": ["step", "gltf", "stl"] },
+        "faces": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "features": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "L2 names declared in this revision."
+    },
+    "renames": {
+      "type": "object",
+      "description": "Map of {old_feature_name: new_feature_name} (ACP-3.2-02).",
+      "additionalProperties": { "type": "string" }
+    },
+    "refs": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Every minted ref, mapped to its L2 feature and geometric signature.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["feature"],
+        "properties": {
+          "feature": { "type": "string" },
+          "area_mm2": { "type": "number" },
+          "centroid": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "normal": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        }
+      }
+    },
+    "gate": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["check", "limit", "measured", "unit", "ok"],
+        "properties": {
+          "check": { "type": "string" },
+          "limit": { "type": "number" },
+          "measured": { "type": "number" },
+          "unit": { "type": "string" },
+          "ok": { "type": "boolean" },
+          "kernel_independent": {
+            "type": "boolean",
+            "description": "True when the expected value was derived outside the modelling kernel (ACP-6.4-02)."
+          }
+        }
+      }
+    }
+  }
+}

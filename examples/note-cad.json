@@ -1,0 +1,12 @@
+{
+  "id": "20261017-115119",
+  "artifact": "s-duct",
+  "rev": "f1ad97db35cf",
+  "created": "2026-10-17T11:51:19",
+  "intent": "这个管子再搞弯一些",
+  "op": "set_param",
+  "params": { "A_mm": 90 },
+  "refs": ["#o1.1.f1"],
+  "status": "new",
+  "actor": "human:owner"
+}

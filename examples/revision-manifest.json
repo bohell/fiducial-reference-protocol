@@ -1,0 +1,73 @@
+{
+  "rev": "f1ad97db35cf",
+  "artifact": "s-duct",
+  "created": "2026-10-17T11:45:02",
+  "parent": null,
+  "cause": {
+    "path": "src/gen_sduct.py",
+    "hash": "sha256:6d1c0e6f0b2a4a1f1c9d8e7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f",
+    "params": { "D_mm": 120, "A_mm": 50, "L_mm": 700 },
+    "language": "build123d"
+  },
+  "effect": {
+    "path": "STEP/s_duct.step",
+    "hash": "sha256:9c1f4b2d8e7a6f5c4b3a2d1e0f9c8b7a6d5e4f3c2b1a0d9e8f7c6b5a4d3e2f10",
+    "format": "step",
+    "faces": 3
+  },
+  "features": ["inlet", "outlet", "wall"],
+  "refs": {
+    "#o1.1.f1": {
+      "feature": "wall",
+      "area_mm2": 276718.258,
+      "centroid": [350.006, 40.0, 0.0],
+      "normal": [0, -1, 0]
+    },
+    "#o1.1.f2": {
+      "feature": "inlet",
+      "area_mm2": 11309.734,
+      "centroid": [0.0, 0.0, 0.0],
+      "normal": [-1, 0, 0]
+    },
+    "#o1.1.f3": {
+      "feature": "outlet",
+      "area_mm2": 11309.734,
+      "centroid": [700.0, 0.0, 0.0],
+      "normal": [1, 0, 0]
+    }
+  },
+  "gate": [
+    {
+      "check": "volume_vs_analytic",
+      "limit": 0.02,
+      "measured": 0.00004,
+      "unit": "relative",
+      "ok": true,
+      "kernel_independent": true
+    },
+    {
+      "check": "bbox_vs_analytic",
+      "limit": 1.0,
+      "measured": 0.0,
+      "unit": "mm",
+      "ok": true,
+      "kernel_independent": true
+    },
+    {
+      "check": "boundary_area_vs_analytic",
+      "limit": 0.02,
+      "measured": 0.004,
+      "unit": "relative",
+      "ok": true,
+      "kernel_independent": true
+    },
+    {
+      "check": "mesh_max_non_orthogonality",
+      "limit": 70.0,
+      "measured": 25.9,
+      "unit": "deg",
+      "ok": true,
+      "kernel_independent": false
+    }
+  ]
+}

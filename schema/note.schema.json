@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:acp:schema:note:0.2",
+  "title": "ACP Note",
+  "description": "Minimal exchange unit: a human's intent bound to a revision and the refs it applies to. See ACP v0.2 §5.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "artifact", "rev", "refs", "intent", "created", "status"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{4,64}$",
+      "description": "Unique within the artifact."
+    },
+    "artifact": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Artifact identifier as registered with the implementation."
+    },
+    "rev": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8,64}$",
+      "description": "L1 revision identifier the refs were minted in (full or truncated hash)."
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "intent": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "description": "The human's own words, preserved verbatim (ACP-5.1-03)."
+    },
+    "refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": { "type": "string", "pattern": "^#" },
+      "description": "L3 refs. Every ref MUST resolve in `rev` at acceptance time (ACP-5.1-02)."
+    },
+    "op": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "Optional machine interpretation of the intent. Never replaces `intent`."
+    },
+    "params": {
+      "type": "object",
+      "description": "Structured parameters for `op`, if any."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["new", "acked", "done", "failed"],
+      "description": "Core states. Profile extensions MUST be namespaced (ACP-5.1-04)."
+    },
+    "actor": {
+      "type": "string",
+      "description": "Who created the note, e.g. human:alice or agent:dana."
+    },
+    "agent_note": {
+      "type": "string",
+      "description": "Agent's reply or escalation reason."
+    },
+    "result_rev": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8,64}$",
+      "description": "Revision produced by handling this note."
+    }
+  }
+}

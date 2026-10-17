@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:acp:schema:ledger-event:0.2",
+  "title": "ACP Ledger Event",
+  "description": "One append-only record. Corrections are new events, never rewrites. See ACP v0.2 §5.3.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["seq", "at", "type", "actor", "rev", "payload"],
+  "properties": {
+    "seq": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Strictly increasing within a ledger (ACP-5.3-02)."
+    },
+    "at": { "type": "string", "format": "date-time" },
+    "type": {
+      "type": "string",
+      "enum": [
+        "note_created",
+        "note_acked",
+        "change_applied",
+        "gate_passed",
+        "gate_failed",
+        "revision_published",
+        "reconnect",
+        "escalated",
+        "correction"
+      ]
+    },
+    "actor": {
+      "type": "string",
+      "pattern": "^(human|agent|service):.+$",
+      "description": "Stable identity, e.g. human:alice, agent:dana."
+    },
+    "rev": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8,64}$",
+      "description": "Revision this event is anchored to (I1)."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Event-specific body. See §5.3 for required measurement fields."
+    },
+    "prev_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "Hash of the previous event, enabling truncation detection (ACP-9.4-01)."
+    }
+  }
+}
