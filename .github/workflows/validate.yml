@@ -1,0 +1,31 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  spec:
+    name: spec checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install validator dependency
+        run: python -m pip install --disable-pip-version-check jsonschema
+
+      - name: JSON / JSONL / schema / links / leak-scan / requirement ids
+        run: python tools/validate.py --root .
+
+      - name: Validate with the structural fallback engine too
+        # Both engines must agree; a divergence means one of them is wrong.
+        run: python tools/validate.py --root . --no-jsonschema
