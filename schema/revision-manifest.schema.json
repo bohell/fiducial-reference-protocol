@@ -39,8 +39,23 @@
       "properties": {
         "path": { "type": "string" },
         "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
-        "format": { "type": "string", "examples": ["step", "gltf", "stl"] },
-        "faces": { "type": "integer", "minimum": 0 }
+        "format": { "type": "string", "examples": ["step", "gltf", "stl", "dxf"] },
+        "faces": { "type": "integer", "minimum": 0 },
+        "entities": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Entity count for 2D artifacts (drawing2d profile)."
+        },
+        "canonicalizer": {
+          "type": "object",
+          "description": "Required when the hash is computed over a canonical form rather than the container bytes as written (ACP-3.6-02).",
+          "additionalProperties": false,
+          "required": ["name", "version"],
+          "properties": {
+            "name": { "type": "string" },
+            "version": { "type": "string" }
+          }
+        }
       }
     },
     "features": {
@@ -67,8 +82,9 @@
           "centroid": {
             "type": "array",
             "items": { "type": "number" },
-            "minItems": 3,
-            "maxItems": 3
+            "minItems": 2,
+            "maxItems": 3,
+            "description": "Two components for 2D artifacts (drawing2d), three for 3D."
           },
           "normal": {
             "type": "array",

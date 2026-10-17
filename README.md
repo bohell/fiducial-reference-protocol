@@ -58,6 +58,7 @@ spec/
   profiles/
     cad.md                 parametric CAD profile (reference implementation)
     simulation.md          CFD/simulation case profile
+    drawing2d.md           2D drawing profile (DXF/DWG; design-level, no reference impl)
 schema/
   note.schema.json         machine-readable note (JSON Schema 2020-12)
   revision-manifest.schema.json

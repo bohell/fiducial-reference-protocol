@@ -34,8 +34,10 @@ Beyond core §3.4:
 
 **CAD-2-01** The script **MUST** be runnable headlessly with a fixed parameter set and
 **MUST** produce byte-identical STEP output on repeated runs. Floating-point non-determinism
-in the kernel exporter is acceptable only if the effect hash is computed over a
-canonicalised STEP (re-serialised with sorted entity ordering).
+in the kernel exporter is admissible only under core §3.6: the effect hash is then computed
+over a canonicalised STEP (re-serialised with sorted entity ordering), and the canonicaliser
+is recorded in the manifest per **ACP-3.6-02**. What was a CAD-specific exception in v0.1 is
+now an application of the core rule.
 
 **CAD-2-02** Parameters that a human is expected to discuss **MUST** be declared as named
 module-level constants, not computed inline, so that an agent can rewrite them without
@@ -162,6 +164,18 @@ note creation (core §5.1-02 requires ref resolution, not field completeness).
 > Reference implementation note: this rule exists because an early ref table omitted
 > `normal` and the viewer threw on `undefined.join`, leaving the submit button permanently
 > disabled. One missing optional field silently disabled the primary action.
+
+## 8. Related profiles
+
+This profile covers artifacts whose cause is a text program and whose effect is a B-rep.
+Two adjacent cases have their own profile or mapping:
+
+- **2D drawings** (DXF/DWG, flat parts, hole patterns): see `drawing2d.md`. The decisive
+difference is that a 2D container carries far more volatile state relative to its geometry,
+so canonicalisation is the profile's central requirement rather than a footnote.
+- **Feature-tree CAD** (a binary part edited through a vendor API): the cause is the
+external input set the model is built from — a design table and equation file — not the
+part file. See `drawing2d.md` Appendix A.2.
 
 ## Appendix A — Implementation hazards (informative)
 

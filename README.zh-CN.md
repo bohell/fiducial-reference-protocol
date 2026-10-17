@@ -70,13 +70,14 @@ Profile 可以细化这六条的词汇，**但不能削弱它们**。
 spec/ACP-v0.2.md            规范正文（规范性）
 spec/profiles/cad.md        参数化 CAD profile（有可运行的参考实现）
 spec/profiles/simulation.md 仿真 case profile（patch=L2，case=L1）
+spec/profiles/drawing2d.md  二维图纸 profile（DXF/DWG；设计级，无参考实现）
 schema/*.json               note / revision-manifest / ledger-event 的 JSON Schema
 examples/                   带真实数字的示例（S 形管道 3 面，全部可核对）
 ```
 
 ---
 
-## 两个 Profile 的关键取舍
+## 三个 Profile 的关键取舍
 
 **CAD profile**：门禁必须包含**至少一项与建模内核无关的检查**。
 理由是——只用产出这次改动的那个内核去验证，测的是自洽性，不是正确性。
@@ -86,6 +87,12 @@ examples/                   带真实数字的示例（S 形管道 3 面，全�
 结果是从 case 派生的，把它算进版本哈希会让每次求解都变成一个新 revision，标注锚定就断了。
 同时：face index 级的 ref 在重划网格后必须**降级到 patch 级**，不能做索引算术——面索引是某张网格里的位置，不是身份。
 
+**Drawing2D profile**：核心要求是**效果归一化**，不是门禁。
+二维容器里无关几何的状态比几何本身还多：句柄、时间戳、GUID、当前图层、视口、实体创建顺序。直接哈希 DWG/DXF 字节，同一张图每存一次就是一个新 revision。
+所以：哈希必须算在**规范化 ASCII DXF** 上；规范化器要报版本；且必须提供人类可读的文本形式，否则没法评审 diff。
+另外两条是 2D 特有的：**轮廓闭合检查**（没闭合的轮廓能渲染、能量长度、就是加工不出来）和**实体计数精确相等**（删一个孔只让面积变几十分之一，面积门禁抓不到）。
+本 profile 是**设计级**，不像 CAD profile 有参考实现——门限是从几何推的，不是实测标定的，文里已写明。
+
 ---
 
 ## 不适用边界（显式降级）
@@ -93,6 +100,8 @@ examples/                   带真实数字的示例（S 形管道 3 面，全�
 - 无持久身份的纯生成物：只能 L1 快照 + 每次重选
 - 无机器可读身份的实物：需先数字化配准
 - 高重构率工件：指纹会失效，此时"请重新选择"比"猜一个"更诚实
+- **手绘图纸**：没有 cause，不可重建，因此最高只到 Anchor（见 `drawing2d.md` §2.1）。要上 Editor，图必须由脚本生成。
+- **无 headless 的二进制特征树**（如 SolidWorks 零件）：cause 是驱动它的设计表/方程文件，不是零件文件本身。
 
 ---
 

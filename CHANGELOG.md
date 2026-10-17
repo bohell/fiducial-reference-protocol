@@ -7,6 +7,46 @@ draft versioning: `0.x` releases may change wire formats.
 
 ---
 
+## [Unreleased]
+
+Adds the 2D drawing domain and promotes effect canonicalisation from a CAD footnote to a
+core requirement. Wire formats gain optional fields only, so existing documents remain
+valid and the schema `$id` stays `0.2`. Nothing here removes a required field or changes
+the meaning of an existing one (**ACP-11.2-01**).
+
+### Added
+
+- **Core §3.6 — Effect canonicalisation** (**ACP-3.6-01** to **-04**). A container that
+  carries editor-assigned identity, timestamps, session GUIDs, view state, or creation
+  ordering cannot be hashed as written. The canonicaliser must be named and versioned in the
+  manifest, the form must be reproducible by an independent implementation, and a text
+  projection must exist so a reviewer can diff two revisions.
+- **`spec/profiles/drawing2d.md`** — the 2D drawing profile (`acp-drawing2d/0.2`): L2 is a
+  layer or block name, L3 is a canonical entity index, and refs must not be derived from
+  DXF handles. Includes two 2D-specific gate checks: **contour closure** (an unclosed
+  contour renders correctly and cannot be machined) and **exact entity count** (deleting a
+  hole changes area by a small, tolerant margin).
+- **`effect.canonicalizer`** and **`effect.entities`** in the revision manifest schema.
+- **Appendix A.1/A.2 of the drawing2d profile** — how the profile maps onto AutoCAD
+  (`accoreconsole` gives headless execution; hand-drawn DWG has no cause) and SolidWorks
+  (no vendor headless mode, so the cause is the design table, not the part file).
+
+### Changed
+
+- **CAD-2-01** now cites core §3.6 instead of carrying its own STEP-specific exception. The
+  rule did not change; its scope did. What was written as a CAD concession is now the general
+  case, which is what it always was.
+- Core §8 lists three profiles rather than two.
+
+### Clarified
+
+- The drawing2d profile states its own evidence level: it is **design-level**, with no
+  reference implementation, and its thresholds are derived geometrically rather than
+  measured. A threshold with a measured number behind it and one with a plausible number
+  behind it are not the same artifact, and the document says which it is.
+
+---
+
 ## [0.2] — 2026-10-17
 
 First public draft. Substantial rewrite of the internal 0.1 draft, which existed only as a

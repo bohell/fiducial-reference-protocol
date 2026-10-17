@@ -1,0 +1,86 @@
+{
+  "rev": "7c2e91a4b8d3",
+  "artifact": "mounting-plate",
+  "created": "2026-10-17T17:20:00Z",
+  "parent": null,
+  "cause": {
+    "path": "src/plate.lsp",
+    "hash": "sha256:4e8b1c7d2a9f3b6e5d8c1a4f7b0e3d6c9a2f5b8e1d4c7a0f3b6e9d2c5a8f1b4e",
+    "params": { "PLATE_W": 120, "PLATE_H": 80, "HOLE_D": 10, "PITCH_X": 100, "PITCH_Y": 60 },
+    "language": "AutoLISP"
+  },
+  "effect": {
+    "path": "DXF/plate.canonical.dxf",
+    "hash": "sha256:b1a4d7e0c3f6a9b2d5e8c1f4a7b0d3e6c9f2a5b8d1e4c7f0a3b6d9e2c5f8a1b4",
+    "format": "dxf",
+    "entities": 5,
+    "canonicalizer": { "name": "dxf-canon", "version": "1.0.0" }
+  },
+  "features": ["outline", "hole_tl", "hole_tr", "hole_bl", "hole_br"],
+  "refs": {
+    "#e1": {
+      "feature": "outline",
+      "length_perimeter_mm": 400.0,
+      "centroid": [60.0, 40.0],
+      "bbox_diag_mm": 144.222
+    },
+    "#e2": {
+      "feature": "hole_tl",
+      "length_perimeter_mm": 31.4159,
+      "centroid": [10.0, 70.0],
+      "bbox_diag_mm": 144.222
+    },
+    "#e3": {
+      "feature": "hole_tr",
+      "length_perimeter_mm": 31.4159,
+      "centroid": [110.0, 70.0],
+      "bbox_diag_mm": 144.222
+    },
+    "#e4": {
+      "feature": "hole_bl",
+      "length_perimeter_mm": 31.4159,
+      "centroid": [10.0, 10.0],
+      "bbox_diag_mm": 144.222
+    },
+    "#e5": {
+      "feature": "hole_br",
+      "length_perimeter_mm": 31.4159,
+      "centroid": [110.0, 10.0],
+      "bbox_diag_mm": 144.222
+    }
+  },
+  "gate": [
+    {
+      "check": "net_area_vs_analytic",
+      "limit": 0.0001,
+      "measured": 0.000012,
+      "unit": "relative",
+      "ok": true,
+      "kernel_independent": true
+    },
+    {
+      "check": "outer_perimeter_vs_analytic",
+      "limit": 0.0001,
+      "measured": 0.0,
+      "unit": "relative",
+      "ok": true,
+      "kernel_independent": true
+    },
+    {
+      "check": "contour_closure",
+      "limit": 1e-06,
+      "measured": 0.0,
+      "unit": "mm",
+      "ok": true,
+      "kernel_independent": true
+    },
+    {
+      "check": "entity_count",
+      "limit": 0.0,
+      "measured": 0.0,
+      "unit": "delta",
+      "ok": true,
+      "kernel_independent": true
+    }
+  ]
+}

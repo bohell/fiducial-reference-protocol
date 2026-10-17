@@ -90,9 +90,36 @@ def check_json(files: list[Path]) -> int:
 
 
 # ----------------------------------------------------------------- 3
+# Keywords the structural fallback understands. If a schema starts using a
+# construct outside this set, the fallback must fail loudly instead of passing:
+# a silent pass is indistinguishable from a passing check, which would make the
+# CI assertion "both engines agree" meaningless.
+#
+# `format` is accepted but not enforced, matching JSON Schema's default (format
+# is an annotation unless a format checker is supplied). The real engine used in
+# CI behaves the same way, so the two stay comparable.
+_FALLBACK_SUPPORTED = {
+    "$schema", "$id", "title", "description", "examples", "format",
+    "type", "properties", "required", "additionalProperties", "items",
+    "enum", "minItems", "maxItems", "minimum", "maximum",
+    "minLength", "maxLength", "pattern", "minProperties", "maxProperties",
+}
+
+
 def _structural(instance, schema, path="$"):
-    """Minimal validator: required keys, type, additionalProperties=false, enum."""
+    """Validator used when jsonschema is unavailable.
+
+    Fails closed on unrecognised schema constructs. Covers the constraints the
+    reference schemas actually use: type, required, additionalProperties (both
+    boolean and schema form), items, enum, string length and pattern, numeric
+    bounds, and array/object cardinality.
+    """
     errs = []
+
+    unknown = sorted(set(schema) - _FALLBACK_SUPPORTED)
+    if unknown:
+        return [f"{path}: unsupported schema keyword(s) {unknown}; fallback refuses to pass"]
+
     t = schema.get("type")
     types = t if isinstance(t, list) else ([t] if t else [])
     if types:
@@ -109,19 +136,42 @@ def _structural(instance, schema, path="$"):
                 good = True
         if not good:
             return [f"{path}: expected {types}"]
+    if isinstance(instance, str):
+        if "minLength" in schema and len(instance) < schema["minLength"]:
+            errs.append(f"{path}: shorter than minLength {schema['minLength']}")
+        if "maxLength" in schema and len(instance) > schema["maxLength"]:
+            errs.append(f"{path}: longer than maxLength {schema['maxLength']}")
+        if "pattern" in schema and not re.search(schema["pattern"], instance):
+            errs.append(f"{path}: {instance!r} does not match pattern {schema['pattern']!r}")
+    if isinstance(instance, (int, float)) and not isinstance(instance, bool):
+        if "minimum" in schema and instance < schema["minimum"]:
+            errs.append(f"{path}: {instance} below minimum {schema['minimum']}")
+        if "maximum" in schema and instance > schema["maximum"]:
+            errs.append(f"{path}: {instance} above maximum {schema['maximum']}")
     if isinstance(instance, dict):
         props = schema.get("properties", {})
         for r in schema.get("required", []):
             if r not in instance:
                 errs.append(f"{path}: missing required '{r}'")
-        if schema.get("additionalProperties") is False:
-            for k in instance:
-                if k not in props:
-                    errs.append(f"{path}: unexpected '{k}'")
+        if "minProperties" in schema and len(instance) < schema["minProperties"]:
+            errs.append(f"{path}: fewer than minProperties {schema['minProperties']}")
+        if "maxProperties" in schema and len(instance) > schema["maxProperties"]:
+            errs.append(f"{path}: more than maxProperties {schema['maxProperties']}")
+        addl = schema.get("additionalProperties")
         for k, v in instance.items():
             if k in props:
                 errs += _structural(v, props[k], f"{path}.{k}")
+            elif addl is False:
+                errs.append(f"{path}: unexpected '{k}'")
+            elif isinstance(addl, dict):
+                # Schema-valued additionalProperties: this is how the ref table
+                # is validated at all. Ignoring it would skip the protocol core.
+                errs += _structural(v, addl, f"{path}.{k}")
     elif isinstance(instance, list):
+        if "minItems" in schema and len(instance) < schema["minItems"]:
+            errs.append(f"{path}: fewer than minItems {schema['minItems']}")
+        if "maxItems" in schema and len(instance) > schema["maxItems"]:
+            errs.append(f"{path}: more than maxItems {schema['maxItems']}")
         for i, v in enumerate(instance):
             errs += _structural(v, schema.get("items", {}), f"{path}[{i}]")
     if "enum" in schema and instance not in schema["enum"]:
@@ -129,11 +179,36 @@ def _structural(instance, schema, path="$"):
     return errs
 
 
+def _schema_pairs(root: Path) -> list[tuple[str, str]]:
+    """Bind every example to a schema by longest name-prefix match.
+
+    examples/note-cad.json            -> schema/note.schema.json
+    examples/revision-manifest.json   -> schema/revision-manifest.schema.json
+    examples/revision-manifest-2d.json-> schema/revision-manifest.schema.json
+
+    Discovery, not a hardcoded list: an example that is added but never bound
+    would otherwise report success by being skipped.
+    """
+    ex_dir, sch_dir = root / "examples", root / "schema"
+    schemas = sorted(sch_dir.glob("*.schema.json"))
+    pairs: list[tuple[str, str]] = []
+    for inst in sorted(ex_dir.glob("*.json")):
+        best_stem, best_sch = "", None
+        for sch in schemas:
+            stem = sch.name[: -len(".schema.json")]
+            if inst.stem == stem or inst.stem.startswith(stem + "-"):
+                if len(stem) > len(best_stem):
+                    best_stem, best_sch = stem, sch
+        rel_i = inst.relative_to(root).as_posix()
+        if best_sch is None:
+            fail(f"{rel_i}: no schema bound to this example")
+            continue
+        pairs.append((rel_i, best_sch.relative_to(root).as_posix()))
+    return pairs
+
+
 def check_schemas(root: Path, force_structural: bool = False) -> int:
-    pairs = [
-        ("examples/note-cad.json", "schema/note.schema.json"),
-        ("examples/revision-manifest.json", "schema/revision-manifest.schema.json"),
-    ]
+    pairs = _schema_pairs(root)
     have = False
     if not force_structural:
         try:

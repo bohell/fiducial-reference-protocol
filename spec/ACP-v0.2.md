@@ -200,6 +200,36 @@ matters.
 effect, and reference table. If a rebuild produces a different effect from an identical
 cause, the implementation **MUST** treat this as an error, not as a new revision.
 
+### 3.6 Effect canonicalisation
+
+The effect of an artifact is usually stored in a container that carries information
+unrelated to geometry: editor-assigned identity, timestamps, session GUIDs, view state,
+creation ordering, and float formatting noise. Hashing such a container byte-for-byte
+yields an identifier that changes when nothing geometric changed — and that an independent
+party cannot reproduce.
+
+**ACP-3.6-01** Where the effect container carries volatile state, the effect hash **MUST** be
+computed over a canonical form that removes that state, not over the container bytes as
+written.
+
+**ACP-3.6-02** The canonicaliser **MUST** be identified by name and version in the revision
+manifest (`effect.canonicalizer`). Otherwise a revision identifier that changed because the
+canonicaliser was upgraded is indistinguishable from a geometry change.
+
+**ACP-3.6-03** The canonical form **MUST** be reproducible by an independent implementation
+from the same cause. Where the canonical form is not human-readable text, a text projection
+**MUST** be published alongside it so two revisions can be diffed by a reviewer.
+
+**ACP-3.6-04** Two runs of the same cause with the same canonicaliser version **MUST** produce
+byte-identical canonical output. A difference **MUST** be treated as an error and **MUST NOT**
+be absorbed by widening a gate threshold.
+
+> Rationale: without this rule, an artifact whose exporter writes a timestamp cannot
+> participate in ACP at all, and one whose exporter emits entities in creation order
+> produces a new “revision” on every save. Both failures present as protocol instability
+> when the defect is in the exporter. The rule also makes review possible: a reviewer can
+> only diff what is stable.
+
 ---
 
 ## 4. Invariants
@@ -448,6 +478,10 @@ domain-specific invariants.
 `spec/profiles/cad.md` defines the parametric CAD profile with a working implementation.
 `spec/profiles/simulation.md` defines the simulation profile, where L2 is a boundary-patch
 or dictionary key and L1 includes the case definition plus the result timestep.
+`spec/profiles/drawing2d.md` defines the 2D drawing profile (DXF/DWG), where L2 is a layer
+or block name and effect canonicalisation is the profile's central requirement (§3.6). It is
+design-level: unlike the CAD profile it has no reference implementation, and its thresholds
+are derived geometrically rather than measured.
 
 ---
 
