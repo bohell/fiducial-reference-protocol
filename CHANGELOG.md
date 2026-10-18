@@ -7,13 +7,15 @@ draft versioning: `0.x` releases may change wire formats.
 
 ---
 
-## [Unreleased]
+## [0.2] — 2026-10-18
 
-Renames the protocol and adds the 2D drawing domain; effect canonicalisation moves from a
-CAD footnote to a core requirement. Wire formats gain optional fields only, so existing
-documents remain valid and the schema `$id` version stays `0.2`. Nothing here removes a
-required field or changes the meaning of an existing one (**FRP-11.2-01**) — except the
-identifier prefix, which is called out under *Changed* rather than left implicit.
+First public release. A substantial rewrite of the internal 0.1 draft, which existed only as
+a single unstructured document. This release also adds the 2D drawing domain and promotes
+effect canonicalisation from a CAD footnote to a core requirement. Wire formats gained
+optional fields only, so documents written against the interim 0.2 drafts remain valid and
+the schema `$id` version stays `0.2`. Nothing here removes a required field or changes the
+meaning of an existing one (**FRP-11.2-01**) — except the identifier prefix, which is called
+out under *Changed* rather than left implicit.
 
 ### Added
 
@@ -27,10 +29,34 @@ identifier prefix, which is called out under *Changed* rather than left implicit
   DXF handles. Includes two 2D-specific gate checks: **contour closure** (an unclosed
   contour renders correctly and cannot be machined) and **exact entity count** (deleting a
   hole changes area by a small, tolerant margin).
-- **`effect.canonicalizer`** and **`effect.entities`** in the revision manifest schema.
 - **Appendix A.1/A.2 of the drawing2d profile** — how the profile maps onto AutoCAD
   (`accoreconsole` gives headless execution; hand-drawn DWG has no cause) and SolidWorks
   (no vendor headless mode, so the cause is the design table, not the part file).
+- **`effect.canonicalizer`** and **`effect.entities`** in the revision manifest schema.
+- **Normative requirement ids** (`FRP-<section>-<nn>`) so conformance reports can cite text
+  directly instead of quoting prose.
+- **Conformance classes** (Viewer / Anchor / Editor / Full, §7) with a checklist in
+  Appendix A. Previously an implementation could only claim to be "compliant", which said
+  nothing about what it could actually do.
+- **JSON Schemas** for note, revision manifest, and ledger event (`schema/`), with
+  `additionalProperties: false` and namespaced extension keys (§11).
+- **Reconnect as a first-class operation** (§6.2) with mandatory recording of the fingerprint,
+  the metric value, the candidate count, and the method. The rule that ambiguity must be
+  reported rather than resolved silently is new.
+- **Permission surface requirements** for editing agents (§9.3, and per-profile sections):
+  no write access to the revision store, the ledger, or the gate definition.
+- **Ledger chaining** (`prev_hash`) as a SHOULD (§9.4) for truncation detection.
+- **Privacy section** (§10): disclosure when `intent` text is sent to a third-party model,
+  and retention limits that do not rewrite history.
+- **Appendix B — Design rationale** (non-normative), including why per-face UUIDs are
+  rejected and why refs must be revision-scoped. Both were argued internally; writing them
+  down makes them falsifiable.
+- Two profiles with measured worked numbers (`frp-cad/0.2`, `frp-sim/0.2`) and a third that
+  is design-level only (`frp-drawing2d/0.2`).
+- Profile appendices listing **implementation hazards**: build caches keyed by source path,
+  daemon workers not inheriting per-call environment, buffered output hiding success flags,
+  overlay elements swallowing pointer events, reload-versus-redeployment, and mixed
+  local/remote absolute paths in destructive commands.
 
 ### Changed
 
@@ -62,50 +88,8 @@ identifier prefix, which is called out under *Changed* rather than left implicit
 - **CAD-2-01** now cites core §3.6 instead of carrying its own STEP-specific exception. The
   rule did not change; its scope did. What was written as a CAD concession is now the general
   case, which is what it always was.
+
 - Core §8 lists three profiles rather than two.
-
-### Clarified
-
-- The drawing2d profile states its own evidence level: it is **design-level**, with no
-  reference implementation, and its thresholds are derived geometrically rather than
-  measured. A threshold with a measured number behind it and one with a plausible number
-  behind it are not the same artifact, and the document says which it is.
-
----
-
-## [0.2] — 2026-10-17
-
-First public draft. Substantial rewrite of the internal 0.1 draft, which existed only as a
-single unstructured document.
-
-### Added
-
-- **Normative requirement ids** (`FRP-<section>-<nn>`) so conformance reports can cite text
-  directly instead of quoting prose.
-- **Conformance classes** (Viewer / Anchor / Editor / Full, §7) with a checklist in
-  Appendix A. Previously an implementation could only claim to be "compliant", which said
-  nothing about what it could actually do.
-- **JSON Schemas** for note, revision manifest, and ledger event (`schema/`), with
-  `additionalProperties: false` and namespaced extension keys (§11).
-- **Reconnect as a first-class operation** (§6.2) with mandatory recording of the fingerprint,
-  the metric value, the candidate count, and the method. The rule that ambiguity must be
-  reported rather than resolved silently is new.
-- **Permission surface requirements** for editing agents (§9.3, and per-profile sections):
-  no write access to the revision store, the ledger, or the gate definition.
-- **Ledger chaining** (`prev_hash`) as a SHOULD (§9.4) for truncation detection.
-- **Privacy section** (§10): disclosure when `intent` text is sent to a third-party model,
-  and retention limits that do not rewrite history.
-- **Appendix B — Design rationale** (non-normative), including why per-face UUIDs are
-  rejected and why refs must be revision-scoped. Both were argued internally; writing them
-  down makes them falsifiable.
-- Two profiles with worked numbers: `frp-cad/0.2` and `frp-sim/0.2`.
-- Profile appendices listing **implementation hazards**: build caches keyed by source path,
-  daemon workers not inheriting per-call environment, buffered output hiding success flags,
-  overlay elements swallowing pointer events, reload-versus-redeployment, and mixed
-  local/remote absolute paths in destructive commands.
-
-### Changed
-
 - The core invariant set is now stated as **six numbered invariants** (§4) rather than
   embedded in prose. Profiles are explicitly forbidden from weakening them.
 - `Verify` now **requires at least one kernel-independent check** (§6.4-02). A gate computed
@@ -114,6 +98,13 @@ single unstructured document.
   (CAD-5-04), so a single ledger entry explains the whole state.
 - Revision identity explicitly excludes derived results in the simulation profile
   (SIM-1-02), so that solver runs do not each become a new revision.
+
+### Clarified
+
+- The drawing2d profile states its own evidence level: it is **design-level**, with no
+  reference implementation, and its thresholds are derived geometrically rather than
+  measured. A threshold with a measured number behind it and one with a plausible number
+  behind it are not the same artifact, and the document says which it is.
 
 ### Removed
 
@@ -126,8 +117,10 @@ single unstructured document.
 
 ### Known issues
 
-- **Name collision.** "FRP" is also used by the Agent Communication Protocol. A rename is
-  likely before 1.0.
+- **Residual name collision.** "FRP" is also used for *Functional Reactive Programming* and
+  for fibre-reinforced polymer/plastic. Both sit in distant fields and neither is a reader
+  hazard for a CAD/CFD audience, so the collision is accepted; the documents require the
+  full name at first occurrence. Revisiting this costs more after external citation exists.
 - **Time-scoped refs** are not specified. Annotating a feature that exists during only part
   of a transient is handled by a payload field, not by a first-class L3 (see
   `simulation.md` Appendix A).

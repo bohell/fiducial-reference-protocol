@@ -1,6 +1,6 @@
 # Fiducial Reference Protocol (FRP)
 
-**Version 0.2 (Draft Standard)** · 2026-10-17
+**Version 0.2 (Draft Standard)** · released 2026-10-18 · [changelog](CHANGELOG.md)
 
 > A protocol for humans and AI agents to talk about *parts of an engineering artifact* —
 > and to agree, verifiably, on what changed.

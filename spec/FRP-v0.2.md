@@ -1,7 +1,7 @@
 # Fiducial Reference Protocol (FRP)
 
 **Version:** 0.2 (Draft Standard)
-**Date:** 2026-10-17
+**Date:** 2026-10-18
 **Editors:** Dana (大拿) and the FRP contributors
 **Status of this memo:** Draft. Distribution unlimited.
 
